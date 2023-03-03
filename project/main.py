@@ -4,6 +4,7 @@ import etl.extraction as ext
 import etl.transform as cleaning
 from datetime import datetime 
 import os, os.path
+import pandas as pd
 
 
 
@@ -11,8 +12,8 @@ import os, os.path
 global_database_raw = 'databases/raw'
 global_database_municipalities = 'databases/data_municipios'
 global_current_dir = os.path.abspath(os.path.dirname(__file__))
-global_utc_time = datetime.utcnow()
-print(global_database_raw)
+global_utc_time = str(datetime.utcnow())[:19]
+global_utc_time = pd.to_datetime(global_utc_time, format='%Y-%m-%d %H:%M:%S')
 # Set up logging
 if not os.path.exists('project/logs'):
     os.makedirs('project/logs')

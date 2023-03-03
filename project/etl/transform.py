@@ -4,15 +4,13 @@ from etl.loading_to_database import data_to_db, read_db
 import sys
 
 
-def cleaning_text(df):
+def cleaning_text(df, column_name):
     # This function takes the dataframe and cleans the text and returns the cleaned dataframe
-    df['municipality'] = df['municipality'].str.replace(' ', '_').str.replace('á', 'a').str.replace('é', 'e'
+    df[column_name] = df[column_name].str.replace(' ', '_').str.replace('á', 'a').str.replace('é', 'e'
     ).str.replace('í', 'i').str.replace('ó', 'o').str.replace('ú', 'u').str.replace('ñ', 'n').str.replace('Á', 'A').str.replace('É', 'E'
     ).str.replace('Í', 'I').str.replace('Ó', 'O').str.replace('Ú', 'U').str.replace('Ñ', 'N')
-    df['state'] = df['state'].str.replace(' ', '_').str.replace('á', 'a').str.replace('é', 'e'
-    ).str.replace('í', 'i').str.replace('ó', 'o').str.replace('ú', 'u').str.replace('ñ', 'n').str.replace('Á', 'A').str.replace('É', 'E'
-    ).str.replace('Í', 'I').str.replace('Ó', 'O').str.replace('Ú', 'U').str.replace('Ñ', 'N').str.lower()
-    return df
+    df[column_name] = df[column_name].str.lower()
+    return df[column_name]
 
 
 
@@ -22,8 +20,8 @@ def upload_data_by_municipality(df, global_current_dir, global_database_municipa
     # and the time of execution
 
     municipalities =  df[['municipality', 'state']].drop_duplicates()
-    municipalities['municipality'] = cleaning_text(municipalities['municipality'])
-    municipalities['state'] = cleaning_text(municipalities['state'])
+    municipalities['municipality'] = cleaning_text(municipalities, 'municipality')
+    municipalities['state'] = cleaning_text(municipalities, 'state')
     
     database_name = os.path.join(global_current_dir, global_database_municipalities, 'municipalities.db')
     folder = os.path.join(global_current_dir, global_database_municipalities)
@@ -48,6 +46,7 @@ def upload_data_by_municipality(df, global_current_dir, global_database_municipa
             municipality_df = municipality_df.append(previous_current[missing_values])
             municipality_df['execution_time'] = utc_string
             municipality_df = municipality_df[(municipality_df['utc_time'] >= global_utc_time)]
+            
         data_to_db(municipality_df,folder , database_name, f'{municipality["state"]}_{municipality["municipality"]}_current')
         logging.info(f'Table {municipality} current created')
     return None
